@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2026 수능 영어 듣기평가 실전 모의고사 (4대 킬러 유형)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-target { min-height: 44px; }
+    .option-card:active { transform: scale(0.99); }
+    .glass-header {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between max-w-[480px] mx-auto bg-slate-900 border-x border-slate-800 shadow-2xl relative">
+
+  <!-- Mobile Top Header -->
+  <header class="sticky top-0 z-50 glass-header px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/30">
+        <i class="fa-solid fa-headphones"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1.5">
+          <h1 class="text-sm font-bold text-white tracking-tight">수능 영어 듣기 실전 모의평가</h1>
+          <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-medium">4문항</span>
+        </div>
+        <p class="text-[10px] text-slate-400">Google Research Harness² 출제·검증</p>
+      </div>
+    </div>
+    <div id="exam-timer" class="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-amber-400 border border-slate-700">
+      00:00
+    </div>
+  </header>
+
+  <!-- Instructions Notice -->
+  <div class="bg-blue-950/40 border-b border-blue-500/20 px-4 py-2.5 text-[11px] text-blue-300 flex items-start space-x-2">
+    <i class="fa-solid fa-circle-info text-blue-400 mt-0.5 text-xs"></i>
+    <p class="leading-tight">
+      각 문항의 <strong>[듣기 재생]</strong> 버튼을 눌러 음원을 듣고 답을 선택하세요. 실전 수능과 동일하게 문항당 <strong>최대 2회</strong>까지 청취 가능합니다.
+    </p>
+  </div>
+
+  <!-- Score Board (Hidden by default, shown after submit) -->
+  <div id="score-board" class="hidden m-4 p-4 rounded-2xl bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-500/30 shadow-xl">
+    <div class="flex items-center justify-between mb-3 pb-3 border-b border-indigo-500/20">
+      <div>
+        <span class="text-xs text-indigo-300 font-medium">모의평가 채점 결과</span>
+        <div class="text-2xl font-black text-white mt-0.5">
+          <span id="final-score" class="text-emerald-400">0</span> <span class="text-sm font-normal text-slate-400">/ 12.9점</span>
+        </div>
+      </div>
+      <div id="score-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+        채점 완료
+      </div>
+    </div>
+    <div class="grid grid-cols-4 gap-2 text-center text-xs mb-3">
+      <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div class="text-[10px] text-slate-400">1번</div>
+        <div id="res-q1" class="font-bold text-sm mt-0.5">-</div>
+      </div>
+      <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div class="text-[10px] text-slate-400">2번</div>
+        <div id="res-q2" class="font-bold text-sm mt-0.5">-</div>
+      </div>
+      <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div class="text-[10px] text-slate-400">3번</div>
+        <div id="res-q3" class="font-bold text-sm mt-0.5">-</div>
+      </div>
+      <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div class="text-[10px] text-slate-400">4번</div>
+        <div id="res-q4" class="font-bold text-sm mt-0.5">-</div>
+      </div>
+    </div>
+    <button onclick="resetExam()" class="w-full py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center justify-center space-x-1.5 border border-slate-700">
+      <i class="fa-solid fa-rotate-right"></i>
+      <span>다시 응시하기</span>
+    </button>
+  </div>
+
+  <!-- Questions Container -->
+  <main class="flex-1 px-4 py-3 space-y-6">
+
+    <!-- Question 1 -->
+    <article id="item-q1" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30">1번 · 3.1점</span>
+        <span class="text-[11px] text-slate-400 font-medium">짧은 대화 응답</span>
+      </div>
+      <h2 class="text-sm font-bold text-white mb-3 leading-snug">
+        1. 대화를 듣고, 여자의 마지막 말에 대한 남자의 응답으로 가장 적절한 것을 고르시오.
+      </h2>
+
+      <!-- Audio Player Bar -->
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <button id="btn-play-q1" onclick="togglePlay(1)" class="touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition">
+            <i class="fa-solid fa-play text-xs"></i>
+            <span>듣기 재생</span>
+          </button>
+          <div class="text-[11px] text-slate-400">
+            남은 재생: <strong id="play-count-q1" class="text-blue-400 font-bold">2</strong>회
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="progress-q1" class="bg-blue-500 h-full w-0 transition-all duration-200"></div>
+        </div>
+        <audio id="audio-q1" src="audio/q01.mp3" preload="metadata"></audio>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="space-y-2" id="options-q1">
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q1" value="1" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">① I am glad she liked my proposal presentation.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q1" value="2" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">② You should have submitted it before 5 p.m.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q1" value="3" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">③ Don't worry, she will compress the video soon.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q1" value="4" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">④ The school website will reopen tomorrow morning.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q1" value="5" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">⑤ Okay, I'll compress the file and upload it right now.</span>
+        </label>
+      </div>
+
+      <!-- Explanation Box (Hidden by default) -->
+      <div id="expl-q1" class="hidden mt-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
+        <div class="font-bold text-emerald-400 mb-1 flex items-center justify-between">
+          <span>정답: ⑤번</span>
+          <span class="text-[10px] text-slate-400">성별 시점 일치도 100%</span>
+        </div>
+        <p class="text-[11px] leading-relaxed text-slate-300 mb-2">
+          <strong>[출제 분석]:</strong> 마감 시간이 오늘 오후 5시까지이며 비디오 파일을 압축하라는 여선생님의 긴급 조언에 대해 남학생이 취할 수 있는 가장 적절한 화답은 ⑤번입니다.
+        </p>
+        <details class="text-[11px] text-slate-400">
+          <summary class="cursor-pointer text-blue-400 font-semibold mb-1">대본 전문 보기</summary>
+          <div class="bg-slate-950 p-2 rounded border border-slate-800 space-y-1 font-mono text-[10px] text-slate-300">
+            <p><strong class="text-pink-400">W:</strong> Minho, did you finish submitting your science fair proposal on the school website?</p>
+            <p><strong class="text-blue-400">M:</strong> Not yet, Ms. Park. I was having trouble uploading the video attachment.</p>
+            <p><strong class="text-pink-400">W:</strong> The server will close automatically at 5 p.m. today, so you should convert the video into a smaller file right away.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- Question 2 -->
+    <article id="item-q2" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30">2번 · 3.3점</span>
+        <span class="text-[11px] text-slate-400 font-medium">지불 금액 계산</span>
+      </div>
+      <h2 class="text-sm font-bold text-white mb-3 leading-snug">
+        2. 대화를 듣고, 여자가 지불할 금액을 고르시오. [3점]
+      </h2>
+
+      <!-- Audio Player Bar -->
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <button id="btn-play-q2" onclick="togglePlay(2)" class="touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition">
+            <i class="fa-solid fa-play text-xs"></i>
+            <span>듣기 재생</span>
+          </button>
+          <div class="text-[11px] text-slate-400">
+            남은 재생: <strong id="play-count-q2" class="text-blue-400 font-bold">2</strong>회
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="progress-q2" class="bg-blue-500 h-full w-0 transition-all duration-200"></div>
+        </div>
+        <audio id="audio-q2" src="audio/q02.mp3" preload="metadata"></audio>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="space-y-2" id="options-q2">
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q2" value="1" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">① $32</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q2" value="2" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">② $36</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q2" value="3" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">③ $38</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q2" value="4" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">④ $40</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q2" value="5" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">⑤ $45</span>
+        </label>
+      </div>
+
+      <!-- Explanation Box -->
+      <div id="expl-q2" class="hidden mt-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
+        <div class="font-bold text-emerald-400 mb-1 flex items-center justify-between">
+          <span>정답: ②번 ($36)</span>
+          <span class="text-[10px] text-slate-400">산술 정합성 오차 0원</span>
+        </div>
+        <p class="text-[11px] leading-relaxed text-slate-300 mb-2">
+          <strong>[계산 과정]:</strong> 텀블러 2개($15 × 2 = $30) + 에코백 1개($10) = 총 $40. 여기에 학생회 10% 할인 쿠폰(-$4)이 적용되므로 최종 지불액은 <strong>$36</strong>입니다.
+        </p>
+        <details class="text-[11px] text-slate-400">
+          <summary class="cursor-pointer text-blue-400 font-semibold mb-1">대본 전문 보기</summary>
+          <div class="bg-slate-950 p-2 rounded border border-slate-800 space-y-1 font-mono text-[10px] text-slate-300">
+            <p><strong class="text-blue-400">M:</strong> They are $15 each. And these canvas eco-bags next to them are $10 each.</p>
+            <p><strong class="text-pink-400">W:</strong> Great. I will take two tumblers and one eco-bag, please.</p>
+            <p><strong class="text-pink-400">W:</strong> Yes, here is a 10% discount coupon from the student council flyer.</p>
+            <p><strong class="text-blue-400">M:</strong> Wonderful. That coupon takes 10% off the total amount.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- Question 3 -->
+    <article id="item-q3" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30">3번 · 3.2점</span>
+        <span class="text-[11px] text-slate-400 font-medium">도표 내용 일치</span>
+      </div>
+      <h2 class="text-sm font-bold text-white mb-2 leading-snug">
+        3. 다음 표를 보면서 대화를 듣고, 두 사람이 구매할 무선 마우스를 고르시오.
+      </h2>
+
+      <!-- Table in Exam -->
+      <div class="overflow-x-auto my-3 rounded-xl border border-slate-700 bg-slate-950/70 p-1">
+        <table class="w-full text-[10px] text-left text-slate-300">
+          <thead class="bg-slate-800/80 text-slate-400 uppercase">
+            <tr>
+              <th class="p-1.5">Model</th>
+              <th class="p-1.5">Price</th>
+              <th class="p-1.5">Connection</th>
+              <th class="p-1.5">Battery</th>
+              <th class="p-1.5">Warranty</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr><td class="p-1.5 font-bold">A</td><td class="p-1.5">$45</td><td class="p-1.5">Bluetooth</td><td class="p-1.5">Rechargeable</td><td class="p-1.5">1 year</td></tr>
+            <tr class="bg-blue-950/20"><td class="p-1.5 font-bold text-blue-400">B</td><td class="p-1.5 text-blue-400">$38</td><td class="p-1.5 text-blue-400">Bluetooth</td><td class="p-1.5 text-blue-400">Rechargeable</td><td class="p-1.5 text-blue-400">2 years</td></tr>
+            <tr><td class="p-1.5 font-bold">C</td><td class="p-1.5">$35</td><td class="p-1.5">2.4GHz USB</td><td class="p-1.5">Disposable</td><td class="p-1.5">1 year</td></tr>
+            <tr><td class="p-1.5 font-bold">D</td><td class="p-1.5">$28</td><td class="p-1.5">Bluetooth</td><td class="p-1.5">Disposable</td><td class="p-1.5">2 years</td></tr>
+            <tr><td class="p-1.5 font-bold">E</td><td class="p-1.5">$50</td><td class="p-1.5">Dual mode</td><td class="p-1.5">Rechargeable</td><td class="p-1.5">3 years</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Audio Player Bar -->
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <button id="btn-play-q3" onclick="togglePlay(3)" class="touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition">
+            <i class="fa-solid fa-play text-xs"></i>
+            <span>듣기 재생</span>
+          </button>
+          <div class="text-[11px] text-slate-400">
+            남은 재생: <strong id="play-count-q3" class="text-blue-400 font-bold">2</strong>회
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="progress-q3" class="bg-blue-500 h-full w-0 transition-all duration-200"></div>
+        </div>
+        <audio id="audio-q3" src="audio/q03.mp3" preload="metadata"></audio>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="space-y-2" id="options-q3">
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q3" value="1" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">① Model A</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q3" value="2" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">② Model B</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q3" value="3" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">③ Model C</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q3" value="4" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">④ Model D</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q3" value="5" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">⑤ Model E</span>
+        </label>
+      </div>
+
+      <!-- Explanation Box -->
+      <div id="expl-q3" class="hidden mt-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
+        <div class="font-bold text-emerald-400 mb-1 flex items-center justify-between">
+          <span>정답: ②번 (Model B)</span>
+          <span class="text-[10px] text-slate-400">4단계 순차 소거 일치</span>
+        </div>
+        <p class="text-[11px] leading-relaxed text-slate-300 mb-2">
+          <strong>[소거 분석]:</strong> 예산 $40 미만(Model E 제외) → 블루투스 필수(Model C 제외) → 충전식 배터리(Model D 제외) → 보증 2년 이상(Model A 제외) 순서로 소거되어 <strong>Model B</strong>가 최종 선택됩니다.
+        </p>
+      </div>
+    </article>
+
+    <!-- Question 4 -->
+    <article id="item-q4" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30">4번 · 3.3점</span>
+        <span class="text-[11px] text-slate-400 font-medium">긴 대화 응답</span>
+      </div>
+      <h2 class="text-sm font-bold text-white mb-3 leading-snug">
+        4. 대화를 듣고, 남자의 마지막 말에 대한 여자의 응답으로 가장 적절한 것을 고르시오. [3점]
+      </h2>
+
+      <!-- Audio Player Bar -->
+      <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <button id="btn-play-q4" onclick="togglePlay(4)" class="touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition">
+            <i class="fa-solid fa-play text-xs"></i>
+            <span>듣기 재생</span>
+          </button>
+          <div class="text-[11px] text-slate-400">
+            남은 재생: <strong id="play-count-q4" class="text-blue-400 font-bold">2</strong>회
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="progress-q4" class="bg-blue-500 h-full w-0 transition-all duration-200"></div>
+        </div>
+        <audio id="audio-q4" src="audio/q04.mp3" preload="metadata"></audio>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="space-y-2" id="options-q4">
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q4" value="1" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">① I already told him that the broadcast camera was broken.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q4" value="2" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">② You should speak slower during the festival ceremony.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q4" value="3" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">③ Thanks. I'll take a deep breath and trust my preparation.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q4" value="4" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">④ The drama teacher decided to cancel the live festival.</span>
+        </label>
+        <label class="option-card touch-target flex items-start p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 cursor-pointer transition">
+          <input type="radio" name="answer-q4" value="5" class="mt-1 w-4 h-4 text-blue-600 bg-slate-800 border-slate-600 focus:ring-blue-500">
+          <span class="ml-2.5 text-xs text-slate-200 leading-snug">⑤ I don't think you need any more announcement rehearsal.</span>
+        </label>
+      </div>
+
+      <!-- Explanation Box -->
+      <div id="expl-q4" class="hidden mt-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
+        <div class="font-bold text-emerald-400 mb-1 flex items-center justify-between">
+          <span>정답: ③번</span>
+          <span class="text-[10px] text-slate-400">구어체 화답 완성</span>
+        </div>
+        <p class="text-[11px] leading-relaxed text-slate-300 mb-2">
+          <strong>[출제 분석]:</strong> 무대 공포증 극복을 위한 심호흡과 첫 문장 집중에 대한 남학생의 격려에 대해 여학생이 안도하며 조언을 수용하는 ③번이 가장 적절합니다.
+        </p>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Bottom Floating Submit Bar -->
+  <footer class="sticky bottom-0 z-50 p-4 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
+    <button id="btn-submit" onclick="submitExam()" class="w-full touch-target py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 active:scale-[0.99] transition flex items-center justify-center space-x-2">
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>답안 제출 및 자동 채점하기</span>
+    </button>
+  </footer>
+
+  <script>
+    // State
+    const answerKey = { 1: "5", 2: "2", 3: "2", 4: "3" };
+    const points = { 1: 3.1, 2: 3.3, 3: 3.2, 4: 3.3 };
+    const remainingPlays = { 1: 2, 2: 2, 3: 2, 4: 2 };
+    let currentPlaying = null;
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    // Start timer
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const s = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('exam-timer').innerText = `${m}:${s}`;
+    }, 1000);
+
+    // Audio Playback Controller
+    function togglePlay(itemNum) {
+      const audio = document.getElementById(`audio-q${itemNum}`);
+      const btn = document.getElementById(`btn-play-q${itemNum}`);
+      const progressBar = document.getElementById(`progress-q${itemNum}`);
+      const countEl = document.getElementById(`play-count-q${itemNum}`);
+
+      if (currentPlaying && currentPlaying !== audio) {
+        currentPlaying.pause();
+        currentPlaying.currentTime = 0;
+        resetPlayBtnUI();
+      }
+
+      if (audio.paused) {
+        if (remainingPlays[itemNum] <= 0) {
+          alert(`[안내] ${itemNum}번 문항의 청취 가능 횟수(최대 2회)를 모두 소진하였습니다.`);
+          return;
+        }
+
+        audio.play().then(() => {
+          currentPlaying = audio;
+          btn.innerHTML = '<i class="fa-solid fa-pause text-xs"></i><span>일시정지</span>';
+          btn.className = 'touch-target px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition';
+        }).catch(err => {
+          console.error("Audio playback error:", err);
+        });
+
+      } else {
+        audio.pause();
+        btn.innerHTML = '<i class="fa-solid fa-play text-xs"></i><span>다시재생</span>';
+        btn.className = 'touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition';
+      }
+
+      // Track progress and finish
+      audio.ontimeupdate = () => {
+        if (audio.duration) {
+          const pct = (audio.currentTime / audio.duration) * 100;
+          progressBar.style.width = `${pct}%`;
+        }
+      };
+
+      audio.onended = () => {
+        remainingPlays[itemNum]--;
+        countEl.innerText = remainingPlays[itemNum];
+        progressBar.style.width = '0%';
+        btn.innerHTML = '<i class="fa-solid fa-play text-xs"></i><span>듣기 재생</span>';
+        btn.className = 'touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition';
+        currentPlaying = null;
+
+        if (remainingPlays[itemNum] === 0) {
+          btn.disabled = true;
+          btn.className = 'touch-target px-3 py-1.5 rounded-lg bg-slate-700 text-slate-500 text-xs font-bold flex items-center space-x-1.5 cursor-not-allowed';
+          btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i><span>청취 종료</span>';
+        }
+      };
+    }
+
+    function resetPlayBtnUI() {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`btn-play-q${i}`);
+        const bar = document.getElementById(`progress-q${i}`);
+        if (btn && !btn.disabled) {
+          btn.innerHTML = '<i class="fa-solid fa-play text-xs"></i><span>듣기 재생</span>';
+          btn.className = 'touch-target px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow transition';
+          bar.style.width = '0%';
+        }
+      }
+    }
+
+    // Submit Exam & Auto Grading
+    function submitExam() {
+      // Check answers
+      let userAnswers = {};
+      let unanswered = [];
+
+      for (let i = 1; i <= 4; i++) {
+        const checked = document.querySelector(`input[name="answer-q${i}"]:checked`);
+        if (checked) {
+          userAnswers[i] = checked.value;
+        } else {
+          unanswered.push(i);
+        }
+      }
+
+      if (unanswered.length > 0) {
+        if (!confirm(`아직 풀지 않은 문항이 있습니다 (${unanswered.join(', ')}번).\n이대로 답안을 제출하시겠습니까?`)) {
+          return;
+        }
+      }
+
+      clearInterval(timerInterval);
+      if (currentPlaying) currentPlaying.pause();
+
+      let totalScore = 0;
+      for (let i = 1; i <= 4; i++) {
+        const uAns = userAnswers[i];
+        const cAns = answerKey[i];
+        const isCorrect = uAns === cAns;
+        const resEl = document.getElementById(`res-q${i}`);
+        const itemBox = document.getElementById(`item-q${i}`);
+        const explBox = document.getElementById(`expl-q${i}`);
+
+        if (isCorrect) {
+          totalScore += points[i];
+          resEl.innerHTML = '<span class="text-emerald-400 font-bold">O 정답</span>';
+          itemBox.className = 'bg-emerald-950/20 border border-emerald-500/40 rounded-2xl p-4 shadow-sm';
+        } else {
+          resEl.innerHTML = '<span class="text-red-400 font-bold">X 오답</span>';
+          itemBox.className = 'bg-red-950/20 border border-red-500/40 rounded-2xl p-4 shadow-sm';
+        }
+
+        // Highlight correct and wrong options
+        const opts = document.querySelectorAll(`#options-q${i} label`);
+        opts.forEach(label => {
+          const inp = label.querySelector('input');
+          if (inp.value === cAns) {
+            label.className = 'option-card touch-target flex items-start p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold';
+          } else if (inp.value === uAns && !isCorrect) {
+            label.className = 'option-card touch-target flex items-start p-2.5 rounded-xl border border-red-500 bg-red-500/20 text-red-300';
+          }
+        });
+
+        // Show explanation
+        explBox.classList.remove('hidden');
+      }
+
+      // Show score board
+      document.getElementById('final-score').innerText = totalScore.toFixed(1);
+      const scoreBoard = document.getElementById('score-board');
+      scoreBoard.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Disable submit button
+      const submitBtn = document.getElementById('btn-submit');
+      submitBtn.disabled = true;
+      submitBtn.className = 'w-full touch-target py-3 px-4 rounded-xl font-bold text-sm bg-slate-700 text-slate-400 cursor-not-allowed flex items-center justify-center space-x-2';
+      submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>채점 완료 (상단 결과를 확인하세요)</span>';
+    }
+
+    function resetExam() {
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>

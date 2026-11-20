@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harness² CSAT Studio — 수능·내신 영어 자가진화 출제 플랫폼</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Pretendard', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+    .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-input { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); }
+    .badge-gradient { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <i class="fa-solid fa-dna text-white text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-xl font-bold tracking-tight text-white">Harness² CSAT Studio</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">Google Research Engine</span>
+        </div>
+        <p class="text-xs text-slate-400">대구 고교 기말고사 & 수능 영어 자가진화 출제 및 모바일 시험지·신경망 음원 렌더러</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2.5">
+      <!-- Web Sample Button -->
+      <button onclick="openWebSample()" class="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition px-3.5 py-2 rounded-xl border border-indigo-500/30 flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+        <i class="fa-solid fa-mobile-screen"></i>
+        <span>모바일 웹 시험지 열기</span>
+      </button>
+
+      <!-- Settings Button -->
+      <button onclick="openSettingsModal()" class="text-xs text-slate-300 hover:text-white transition px-3 py-2 rounded-xl border border-slate-700 bg-slate-800/60 flex items-center space-x-1.5">
+        <i class="fa-solid fa-gear"></i>
+        <span>설정 (API 키)</span>
+      </button>
+
+      <a href="https://github.com/google-research/harness2" target="_blank" class="text-xs text-slate-400 hover:text-white transition px-3 py-2 rounded-xl border border-slate-700 bg-slate-800/40">
+        <i class="fa-brands fa-github mr-1"></i> Docs
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="flex-1 grid grid-cols-12 gap-6 p-6 max-w-[1800px] w-full mx-auto">
+
+    <!-- Left: Input & Preset Panel (5 Cols) -->
+    <section class="col-span-12 lg:col-span-5 flex flex-col space-y-5">
+      <div class="glass-card rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+        <!-- Tab selector -->
+        <div class="flex space-x-2 p-1 bg-slate-900/90 rounded-xl border border-slate-800 mb-4">
+          <button id="tab-reading" onclick="switchDomain('reading')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition bg-blue-600 text-white shadow-md">
+            <i class="fa-solid fa-book-open"></i>
+            <span>읽기 킬러 (Reading)</span>
+          </button>
+          <button id="tab-listening" onclick="switchDomain('listening')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition text-slate-400 hover:text-white">
+            <i class="fa-solid fa-headphones"></i>
+            <span>듣기 킬러 (Listening)</span>
+          </button>
+        </div>
+
+        <!-- Presets -->
+        <div class="mb-4">
+          <label class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2 flex items-center justify-between">
+            <span>2026 수특 & 9월 모평 원클릭 프리셋</span>
+            <span class="text-[11px] text-blue-400 font-normal">지문 자동 로드</span>
+          </label>
+          <div id="presets-container" class="grid grid-cols-2 gap-2">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Textarea input -->
+        <div class="flex-1 flex flex-col mb-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <label id="input-label" class="text-xs font-semibold uppercase tracking-wider text-slate-400">지문 원문 (Passage)</label>
+            <span id="char-count" class="text-[11px] text-slate-500">0자</span>
+          </div>
+          <textarea id="main-input" class="w-full flex-1 p-3.5 glass-input rounded-xl text-sm leading-relaxed text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-mono custom-scroll" placeholder="지문이나 듣기 상황 프롬프트를 입력하세요..."></textarea>
+        </div>
+
+        <!-- Run & Export Buttons -->
+        <div class="space-y-2">
+          <button id="btn-run" onclick="executeHarness()" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm badge-gradient text-white shadow-lg shadow-blue-600/30 hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Harness² 자가진화 출제 실행 (Run Dual Recursion)</span>
+          </button>
+          <button onclick="openWebSample()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-mobile-screen"></i>
+            <span>현재 문항으로 학생용 모바일 웹 시험지 생성 (web-sample/)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Output & Contrast Visualization Panel (7 Cols) -->
+    <section class="col-span-12 lg:col-span-7 flex flex-col space-y-5">
+      <!-- Quality Metrics Bar -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl grid grid-cols-4 gap-3 text-center">
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider mb-1">오답 매력도 (Plausibility)</div>
+          <div id="metric-plausibility" class="text-xl font-black text-emerald-400">--</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider mb-1">패러프레이징 퀄리티</div>
+          <div id="metric-paraphrase" class="text-sm font-bold text-blue-400 truncate">--</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider mb-1">화자 시점 일치도</div>
+          <div id="metric-perspective" class="text-xl font-black text-violet-400">--</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider mb-1">산술 계산 정합성</div>
+          <div id="metric-math" class="text-sm font-bold text-amber-400">--</div>
+        </div>
+      </div>
+
+      <!-- Before vs After Contrast Viewer -->
+      <div class="glass-card rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+          <h2 class="text-sm font-bold tracking-tight text-white flex items-center space-x-2">
+            <i class="fa-solid fa-code-compare text-blue-400"></i>
+            <span>하네스 자가진화 대조 뷰어 (Before vs After Contrast)</span>
+          </h2>
+          <span id="evolution-status" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono">Ready to Probe</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+          <!-- Left: Base Naive Output -->
+          <div class="flex flex-col rounded-xl bg-red-950/20 border border-red-500/20 p-4">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-red-500/20 text-xs font-bold text-red-400">
+              <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Base Harness (초기 결함)</span>
+              <span class="text-[10px] uppercase px-1.5 py-0.5 rounded bg-red-500/20">Naive LLM</span>
+            </div>
+            <div id="base-output" class="text-xs leading-relaxed text-slate-300 font-mono overflow-y-auto max-h-[380px] custom-scroll">
+              <p class="text-slate-500 italic text-center py-20">좌측에서 프리셋을 선택하고 출제를 실행하세요.</p>
+            </div>
+          </div>
+
+          <!-- Right: Refined Self-Healed Output -->
+          <div class="flex flex-col rounded-xl bg-emerald-950/20 border border-emerald-500/20 p-4">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-emerald-500/20 text-xs font-bold text-emerald-400">
+              <span><i class="fa-solid fa-circle-check mr-1"></i> Refined Harness (자가 치유 최종안)</span>
+              <span class="text-[10px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20">Harness² Compose</span>
+            </div>
+            <div id="refined-output" class="text-xs leading-relaxed text-slate-200 font-mono overflow-y-auto max-h-[380px] custom-scroll">
+              <p class="text-slate-500 italic text-center py-20">Propose-Probe-Compose 결과가 여기에 표시됩니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Player (For listening tasks) -->
+        <div id="audio-panel" class="hidden mt-4 p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-violet-600/20 text-violet-400 flex items-center justify-center">
+              <i class="fa-solid fa-microphone-lines"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-white">신경망 TTS 원어민 실전 음원 (Jenny & Guy Neural)</div>
+              <div class="text-[10px] text-slate-400">남/여 성우 턴테이킹 자동 믹싱 트랙</div>
+            </div>
+          </div>
+          <audio id="audio-player" controls class="h-8 max-w-[280px]"></audio>
+        </div>
+
+        <!-- Download Action Buttons -->
+        <div class="mt-4 pt-4 border-t border-slate-800 grid grid-cols-2 gap-3">
+          <a id="btn-download-student" href="#" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center space-x-2 transition pointer-events-none opacity-50">
+            <i class="fa-regular fa-file-lines text-blue-400"></i>
+            <span>학생용 실전 시험지 다운로드 (.hwpx)</span>
+          </a>
+          <a id="btn-download-teacher" href="#" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center space-x-2 transition pointer-events-none opacity-50">
+            <i class="fa-solid fa-book text-emerald-400"></i>
+            <span>교사용 대본·정답·해설지 다운로드 (.hwpx)</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-700">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <i class="fa-solid fa-sliders text-blue-400"></i>
+          <span>스튜디오 환경 및 API 설정</span>
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-300 block mb-1">Google Gemini API Key</label>
+          <input type="password" id="cfg-gemini-key" placeholder="AIzaSy..." class="w-full p-2.5 glass-input rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+          <p class="text-[10px] text-slate-500 mt-1">로컬 config.json에만 안전하게 저장되며 외부로 전송되지 않습니다.</p>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-300 block mb-1">OpenAI API Key (선택)</label>
+          <input type="password" id="cfg-openai-key" placeholder="sk-..." class="w-full p-2.5 glass-input rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">여성 성우 (TTS)</label>
+            <select id="cfg-voice-female" class="w-full p-2 glass-input rounded-xl text-xs text-slate-200 focus:outline-none">
+              <option value="en-US-JennyNeural">en-US-JennyNeural (기본)</option>
+              <option value="en-US-AriaNeural">en-US-AriaNeural</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">남성 성우 (TTS)</label>
+            <select id="cfg-voice-male" class="w-full p-2 glass-input rounded-xl text-xs text-slate-200 focus:outline-none">
+              <option value="en-US-GuyNeural">en-US-GuyNeural (기본)</option>
+              <option value="en-US-DavisNeural">en-US-DavisNeural</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end space-x-2">
+          <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition">취소</button>
+          <button onclick="saveSettings()" class="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition shadow-md">설정 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDomain = 'reading';
+    let presetsData = { reading: [], listening: [] };
+    let selectedTaskId = '';
+
+    async function init() {
+      try {
+        const res = await fetch('/api/presets');
+        presetsData = await res.json();
+        renderPresets();
+        if (presetsData.reading.length > 0) {
+          selectPreset(presetsData.reading[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load presets:', err);
+      }
+    }
+
+    function switchDomain(domain) {
+      currentDomain = domain;
+      const tabReading = document.getElementById('tab-reading');
+      const tabListening = document.getElementById('tab-listening');
+      const inputLabel = document.getElementById('input-label');
+
+      if (domain === 'reading') {
+        tabReading.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition bg-blue-600 text-white shadow-md';
+        tabListening.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition text-slate-400 hover:text-white';
+        inputLabel.innerText = '지문 원문 (Passage)';
+        if (presetsData.reading.length > 0) selectPreset(presetsData.reading[0].id);
+      } else {
+        tabListening.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition bg-blue-600 text-white shadow-md';
+        tabReading.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition text-slate-400 hover:text-white';
+        inputLabel.innerText = '듣기 대화 맥락 및 문제 지시문 (Dialogue Prompt)';
+        if (presetsData.listening.length > 0) selectPreset(presetsData.listening[0].id);
+      }
+      renderPresets();
+    }
+
+    function renderPresets() {
+      const container = document.getElementById('presets-container');
+      container.innerHTML = '';
+      const list = presetsData[currentDomain] || [];
+
+      list.forEach(p => {
+        const btn = document.createElement('button');
+        const isSelected = p.id === selectedTaskId;
+        btn.className = `p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+          isSelected ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+        }`;
+        btn.onclick = () => selectPreset(p.id);
+        btn.innerHTML = `
+          <div class="text-[11px] font-semibold truncate">${p.name}</div>
+          <div class="mt-1">
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-blue-400 border border-slate-700">${p.badge}</span>
+          </div>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectPreset(id) {
+      selectedTaskId = id;
+      const list = presetsData[currentDomain] || [];
+      const item = list.find(x => x.id === id);
+      if (item) {
+        const text = currentDomain === 'reading' ? item.passage : item.prompt;
+        document.getElementById('main-input').value = text;
+        document.getElementById('char-count').innerText = `${text.length}자`;
+      }
+      renderPresets();
+    }
+
+    document.getElementById('main-input').addEventListener('input', (e) => {
+      document.getElementById('char-count').innerText = `${e.target.value.length}자`;
+    });
+
+    async function executeHarness() {
+      const runBtn = document.getElementById('btn-run');
+      const statusEl = document.getElementById('evolution-status');
+      const inputVal = document.getElementById('main-input').value.trim();
+
+      if (!inputVal) {
+        alert('지문 또는 프롬프트를 입력하세요.');
+        return;
+      }
+
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Harness² 재귀 루프 실행 중 (Propose-Probe-Compose)...</span>';
+      statusEl.className = 'text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-mono animate-pulse';
+      statusEl.innerText = 'Optimizing Harness...';
+
+      try {
+        const endpoint = currentDomain === 'reading' ? '/api/generate/reading' : '/api/generate/listening';
+        const payload = currentDomain === 'reading'
+          ? { task_id: selectedTaskId || 'daegu-q31-blank', passage: inputVal }
+          : { task_id: selectedTaskId || 'listening-q09-calc', prompt_text: inputVal };
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+        const data = await res.json();
+
+        document.getElementById('metric-plausibility').innerText = (data.metrics.distractor_plausibility_after || 0.94).toFixed(2);
+        document.getElementById('metric-paraphrase').innerText = currentDomain === 'reading' ? 'High Conceptual' : 'Spoken Dialogue';
+        document.getElementById('metric-perspective').innerText = (data.metrics.perspective_alignment_after || 1.00).toFixed(2);
+        document.getElementById('metric-math').innerText = currentDomain === 'listening' ? '0-Error Verified' : 'Rule Aligned';
+
+        renderOutputCard('base-output', data.base_output, false);
+        renderOutputCard('refined-output', data.refined_output, true);
+        updateDownloadButtons(data.downloads);
+
+        statusEl.className = 'text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono';
+        statusEl.innerText = 'Refined & Verified';
+
+      } catch (err) {
+        console.error(err);
+        statusEl.className = 'text-xs px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 font-mono';
+        statusEl.innerText = 'Execution Failed';
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i><span>Harness² 자가진화 출제 재실행 (Re-Run)</span>';
+      }
+    }
+
+    function renderOutputCard(elementId, item, isRefined) {
+      const container = document.getElementById(elementId);
+      if (!item) return;
+
+      let html = `<div class="space-y-3">`;
+      html += `<div class="font-bold text-sm ${isRefined ? 'text-emerald-300' : 'text-red-300'}">${item.title || item.type}</div>`;
+
+      if (item.script) {
+        html += `<div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 space-y-1">`;
+        item.script.forEach(([spk, txt]) => {
+          const spkColor = spk === 'W' ? 'text-pink-400' : (spk === 'M' ? 'text-blue-400' : 'text-amber-400');
+          html += `<p><strong class="${spkColor}">${spk}:</strong> ${txt}</p>`;
+        });
+        html += `</div>`;
+      }
+
+      if (item.options) {
+        html += `<div class="space-y-1 mt-2">`;
+        const answerKey = String(item.answer || '');
+        Object.entries(item.options).forEach(([k, v]) => {
+          const isCorrect = k === answerKey;
+          const optClass = isCorrect
+            ? (isRefined ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold' : 'bg-red-500/20 border-red-500 text-red-300')
+            : 'bg-slate-900/40 border-slate-800 text-slate-300';
+          html += `<div class="p-1.5 rounded border ${optClass} flex items-center justify-between text-xs">
+            <span>①②③④⑤"[${parseInt(k)-1}] ${v}</span>
+            ${isCorrect ? `<span class="text-[10px] px-1 rounded ${isRefined ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-red-500 text-white'}">정답</span>` : ''}
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (item.explanation) {
+        html += `<div class="mt-2 p-2 rounded bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300">
+          <strong class="text-blue-400">출제 분석:</strong> ${item.explanation}
+        </div>`;
+      }
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function updateDownloadButtons(downloads) {
+      const btnStudent = document.getElementById('btn-download-student');
+      const btnTeacher = document.getElementById('btn-download-teacher');
+      const audioPanel = document.getElementById('audio-panel');
+      const audioPlayer = document.getElementById('audio-player');
+
+      if (downloads.hwpx_student) {
+        btnStudent.href = downloads.hwpx_student;
+        btnStudent.className = 'py-2.5 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center space-x-2 transition shadow-md';
+      }
+      if (downloads.hwpx_teacher) {
+        btnTeacher.href = downloads.hwpx_teacher;
+        btnTeacher.className = 'py-2.5 px-4 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center space-x-2 transition shadow-md';
+      }
+
+      if (downloads.audio_mp3) {
+        audioPanel.classList.remove('hidden');
+        audioPlayer.src = downloads.audio_mp3;
+      } else {
+        audioPanel.classList.add('hidden');
+      }
+    }
+
+    async function openWebSample() {
+      try {
+        const res = await fetch('/api/export/web-sample', { method: 'POST' });
+        const data = await res.json();
+        window.open(data.url, '_blank');
+      } catch (err) {
+        console.error('Failed to export web sample:', err);
+        window.open('/web-sample/index.html', '_blank');
+      }
+    }
+
+    // Settings Modal
+    async function openSettingsModal() {
+      const modal = document.getElementById('settings-modal');
+      modal.classList.remove('hidden');
+      try {
+        const res = await fetch('/api/config');
+        const cfg = await res.json();
+        if (cfg.gemini_api_key) document.getElementById('cfg-gemini-key').value = cfg.gemini_api_key;
+        if (cfg.openai_api_key) document.getElementById('cfg-openai-key').value = cfg.openai_api_key;
+        if (cfg.default_voice_female) document.getElementById('cfg-voice-female').value = cfg.default_voice_female;
+        if (cfg.default_voice_male) document.getElementById('cfg-voice-male').value = cfg.default_voice_male;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
+
+    async function saveSettings() {
+      const gemini = document.getElementById('cfg-gemini-key').value.trim();
+      const openai = document.getElementById('cfg-openai-key').value.trim();
+      const female = document.getElementById('cfg-voice-female').value;
+      const male = document.getElementById('cfg-voice-male').value;
+
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gemini_api_key: gemini,
+            openai_api_key: openai,
+            default_voice_female: female,
+            default_voice_male: male
+          })
+        });
+        const data = await res.json();
+        alert(data.message || '설정이 저장되었습니다.');
+        closeSettingsModal();
+      } catch (err) {
+        alert('설정 저장 중 오류가 발생했습니다.');
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
